@@ -38,20 +38,19 @@ jobs:
         run: |
           SHA_TAG=sha-${GITHUB_SHA::7}
           IMAGE_BASE="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}"
-          echo "IMAGE_BASE=$IMAGE_BASE" >> $GITHUB_ENV
-          echo "TAGS=latest $SHA_TAG" >> $GITHUB_ENV
+          echo "IMAGE_SHA=$IMAGE_BASE:$SHA_TAG" >> $GITHUB_ENV
+          echo "IMAGE_LATEST=$IMAGE_BASE:latest" >> $GITHUB_ENV
           echo "Using tags: latest and $SHA_TAG"
-          echo "latest = convenience tag for testing"
-          echo "$SHA_TAG = immutable tag used in Helm values"
 
       - name: Build and push Docker images
         run: |
-          for tag in $TAGS; do
-            IMAGE_URI="$IMAGE_BASE:$tag"
-            echo "Building and pushing $IMAGE_URI"
-            docker build -t $IMAGE_URI src/ui
-            docker push $IMAGE_URI
-          done
+          docker build \
+            -t "$IMAGE_SHA" \
+            -t "$IMAGE_LATEST" \
+            src/ui
+
+          docker push "$IMAGE_SHA"
+          docker push "$IMAGE_LATEST"
 
       - name: Setup Git auth using GITHUB_TOKEN
         run: |
