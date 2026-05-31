@@ -11,74 +11,20 @@ on:
       - "src/ui/pom.xml"
       - "src/ui/mvnw"
       - "src/ui/.mvn/**"
-      #- ".github/workflows/build-push-ui.yaml" # During testing phases only for prod comment this line
+      - "src/ui/.dockerignore"
+      #- ".github/workflows/build-push-ui.yaml" # Testing only
 
 permissions:
-  id-token: write # Needed for OIDC
-  contents: write # Needed to push commits
-
-env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: retail-store/ui
+  id-token: write
+  contents: write
 
 jobs:
   build-and-push-ui:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::180789647333:role/github-actions-oidc-role-ui2
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Define image tags
-        id: vars
-        run: |
-          SHA_TAG=sha-${GITHUB_SHA::7}
-          IMAGE_BASE="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}"
-          echo "IMAGE_SHA=$IMAGE_BASE:$SHA_TAG" >> $GITHUB_ENV
-          echo "IMAGE_LATEST=$IMAGE_BASE:latest" >> $GITHUB_ENV
-          echo "Using tags: latest and $SHA_TAG"
-
-      - name: Build and push Docker images
-        run: |
-          docker build \
-            -t "$IMAGE_SHA" \
-            -t "$IMAGE_LATEST" \
-            src/ui
-
-          docker push "$IMAGE_SHA"
-          docker push "$IMAGE_LATEST"
-
-      - name: Setup Git auth using GITHUB_TOKEN
-        run: |
-          git config --global user.name "ci-bot"
-          git config --global user.email ""
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-
-      - name: Update Helm values file with new image tag
-        run: |
-          cd src/ui
-          git config user.name "ci-bot"
-          git config user.email ""
-          sed -i "s|^  tag: .*|  tag: sha-${GITHUB_SHA::7}|" chart/values-ui.yaml
-          git diff --quiet || (
-            git add chart/values-ui.yaml
-            git commit -m "Update UI image tag to sha-${GITHUB_SHA::7}"
-            git push origin main
-          )
-
-      - name: CI Complete
-        run: |
-          echo "Image push and Git update done"
-          echo "Images pushed:"
-          echo "$IMAGE_SHA"
-          echo "$IMAGE_LATEST"
+    uses: ./.github/workflows/reusable-build-push-service.yaml
+    with:
+      service_name: ui
+      service_dir: src/ui
+      ecr_repository: retail-store/ui
+      helm_values_file: src/ui/chart/values-ui.yaml
+      role_to_assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-oidc-role-ui
+      aws_region: us-east-1
