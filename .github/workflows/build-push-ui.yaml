@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "src/ui/src/**"
+      - "src/ui/**"
       #- ".github/workflows/build-push-ui.yaml" # During testing phases only for prod comment this line
 
 permissions:
