@@ -1,0 +1,31 @@
+name: Build and Push Cart Service to ECR
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/cart/src/**"
+      - "src/cart/Dockerfile"
+      - "src/cart/pom.xml"
+      - "src/cart/mvnw"
+      - "src/cart/mvnw.cmd"
+      - "src/cart/.mvn/**"
+      - "src/cart/.dockerignore"
+      #- ".github/workflows/build-push-cart.yaml" # Testing only
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push-cart:
+    uses: ./.github/workflows/reusable-build-push-service.yaml
+    with:
+      service_name: cart
+      service_dir: src/cart
+      ecr_repository: retail-store/cart
+      helm_values_file: src/cart/chart/values.yaml
+      role_to_assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-oidc-role-cart
+      aws_region: us-east-1
