@@ -10,7 +10,7 @@ on:
       #- ".github/workflows/build-push-catalog.yaml" # During testing phases only for prod comment this line
 
 permissions:
-  id_token: write # Needed for OIDC
+  id-token: write # Needed for OIDC
   contents: write # Needed to push commits
 
 env:
@@ -78,4 +78,3 @@ jobs:
           echo "Images pushed:"
           echo "$IMAGE_SHA"
           echo "$IMAGE_LATEST"
-          
