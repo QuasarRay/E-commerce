@@ -6,11 +6,10 @@ on:
   push:
     branches: [ "main" ]
     paths:
-        - "src/ui/src/**"
-        - "src/ui/Dockerfile"
-        - "src/ui/pom.xml"
-        - "src/ui/mvnw"
-        - "src/ui/.mvn/**"
+      - "src/catalog/**/*.go"
+      - "src/catalog/go.mod"
+      - "src/catalog/go.sum"
+      - "src/catalog/Dockerfile"
       #- ".github/workflows/build-push-catalog.yaml" # During testing phases only for prod comment this line
 
 permissions:
