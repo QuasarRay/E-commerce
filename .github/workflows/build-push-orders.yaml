@@ -1,0 +1,32 @@
+name: Build and Push Orders Service to ECR
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/orders/src/**"
+      - "src/orders/events/**"
+      - "src/orders/Dockerfile"
+      - "src/orders/pom.xml"
+      - "src/orders/mvnw"
+      - "src/orders/mvnw.cmd"
+      - "src/orders/.mvn/**"
+      - "src/orders/.dockerignore"
+      #- ".github/workflows/build-push-orders.yaml" # Testing only
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push-orders:
+    uses: ./.github/workflows/reusable-build-push-service.yaml
+    with:
+      service_name: orders
+      service_dir: src/orders
+      ecr_repository: retail-store/orders
+      helm_values_file: src/orders/chart/values.yaml
+      role_to_assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-oidc-role-orders
+      aws_region: us-east-1
