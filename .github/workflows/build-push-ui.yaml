@@ -26,7 +26,7 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::180789647333:role/github-actions-oidc-role-ui3
+          role-to-assume: arn:aws:iam::180789647333:role/github-actions-oidc-role-ui2
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -73,4 +73,3 @@ jobs:
       - name: CI Complete
         run: |
           echo "Image push and Git update done"
-          echo "Tags used: $TAGS"
