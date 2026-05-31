@@ -73,3 +73,6 @@ jobs:
       - name: CI Complete
         run: |
           echo "Image push and Git update done"
+          echo "Images pushed:"
+          echo "$IMAGE_SHA"
+          echo "$IMAGE_LATEST"
