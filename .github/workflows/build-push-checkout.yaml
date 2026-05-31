@@ -1,0 +1,33 @@
+name: Build and Push Checkout Service to ECR
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/checkout/src/**"
+      - "src/checkout/test/**"
+      - "src/checkout/Dockerfile"
+      - "src/checkout/package.json"
+      - "src/checkout/package-lock.json"
+      - "src/checkout/yarn.lock"
+      - "src/checkout/nest-cli.json"
+      - "src/checkout/eslint.config.mjs"
+      - "src/checkout/.dockerignore"
+      #- ".github/workflows/build-push-checkout.yaml" # Testing only
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push-checkout:
+    uses: ./.github/workflows/reusable-build-push-service.yaml
+    with:
+      service_name: checkout
+      service_dir: src/checkout
+      ecr_repository: retail-store/checkout
+      helm_values_file: src/checkout/chart/values.yaml
+      role_to_assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-oidc-role-checkout
+      aws_region: us-east-1
