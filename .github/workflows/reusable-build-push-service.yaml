@@ -1,0 +1,104 @@
+name: Reusable Build and Push Service to ECR
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+
+      service_dir:
+        required: true
+        type: string
+
+      ecr_repository:
+        required: true
+        type: string
+
+      helm_values_file:
+        required: true
+        type: string
+
+      role_to_assume:
+        required: true
+        type: string
+
+      aws_region:
+        required: false
+        type: string
+        default: us-east-1
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push-service:
+    runs-on: ubuntu-latest
+
+    env:
+      SERVICE_NAME: ${{ inputs.service_name }}
+      SERVICE_DIR: ${{ inputs.service_dir }}
+      ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+      HELM_VALUES_FILE: ${{ inputs.helm_values_file }}
+      AWS_REGION: ${{ inputs.aws_region }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.role_to_assume }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Define image tags
+        run: |
+          SHA_TAG=sha-${GITHUB_SHA::7}
+          IMAGE_BASE="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}"
+
+          echo "SHA_TAG=$SHA_TAG" >> "$GITHUB_ENV"
+          echo "IMAGE_SHA=$IMAGE_BASE:$SHA_TAG" >> "$GITHUB_ENV"
+          echo "IMAGE_LATEST=$IMAGE_BASE:latest" >> "$GITHUB_ENV"
+
+          echo "Service: $SERVICE_NAME"
+          echo "Using tags: latest and $SHA_TAG"
+
+      - name: Build and push Docker images
+        run: |
+          docker build \
+            -t "$IMAGE_SHA" \
+            -t "$IMAGE_LATEST" \
+            "$SERVICE_DIR"
+
+          docker push "$IMAGE_SHA"
+          docker push "$IMAGE_LATEST"
+
+      - name: Setup Git auth using GITHUB_TOKEN
+        run: |
+          git config --global user.name "ci-bot"
+          git config --global user.email ""
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+      - name: Update Helm values file with new image tag
+        run: |
+          sed -i "s|^\([[:space:]]*tag:[[:space:]]*\).*|\1$SHA_TAG|" "$HELM_VALUES_FILE"
+
+          git diff --quiet || (
+            git add "$HELM_VALUES_FILE"
+            git commit -m "Update $SERVICE_NAME image tag to $SHA_TAG"
+            git push origin main
+          )
+
+      - name: CI Complete
+        run: |
+          echo "Image push and Git update done"
+          echo "Service: $SERVICE_NAME"
+          echo "Images pushed:"
+          echo "$IMAGE_SHA"
+          echo "$IMAGE_LATEST"
