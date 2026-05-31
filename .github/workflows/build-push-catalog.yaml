@@ -6,7 +6,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "src/catalog"
+      - "src/catalog/**"
       #- ".github/workflows/build-push-catalog.yaml" # During testing phases only for prod comment this line
 
 permissions:
@@ -49,7 +49,7 @@ jobs:
           docker build \
             -t "$IMAGE_SHA" \
             -t "$IMAGE_LATEST" \
-            src/ui
+            src/catalog
 
           docker push "$IMAGE_SHA"
           docker push "$IMAGE_LATEST"
