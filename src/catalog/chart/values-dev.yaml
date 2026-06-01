@@ -1,0 +1,18 @@
+# Dev overrides for Catalog service.
+# Cheap, simple, low-availability environment.
+
+replicaCount: 1
+
+image:
+  tag: "" # Updated by CI/CD if dev deployments are enabled
+
+resources:
+  requests:
+    cpu: 64m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false

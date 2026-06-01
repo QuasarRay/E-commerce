@@ -1,0 +1,38 @@
+# Production overrides for Catalog service.
+# Uses external managed database and production scheduling settings.
+
+image:
+  repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/catalog
+  tag: ""        # Updated by CI/CD to sha-<commit>
+
+app:
+  persistence:
+    provider: mysql
+    endpoint: "<prod-rds-endpoint>"
+    database: "catalog"
+
+    secret:
+      create: false
+      name: catalog-db
+
+nodeSelector:
+  karpenter.sh/capacity-type: on-demand
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: catalog
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: catalog
+
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: catalog
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: catalog

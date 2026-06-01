@@ -1,0 +1,26 @@
+# Staging overrides for Catalog service.
+# Production-like behavior with smaller capacity.
+
+image:
+  repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/catalog
+  tag: ""        # Updated by CI/CD to sha-<commit>
+
+replicaCount: 2
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+app:
+  persistence:
+    provider: mysql
+    endpoint: "<staging-rds-endpoint>"
+    database: "catalog"
+
+    secret:
+      create: false
+      name: catalog-db
+
+nodeSelector:
+  karpenter.sh/capacity-type: spot

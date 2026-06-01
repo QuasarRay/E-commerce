@@ -165,8 +165,8 @@ mysql:
 # OPEN TELEMETRY
 # ----------------------------------------------------------------------------
 opentelemetry:
-  enabled: false
-  instrumentation: ""
+  enabled: true
+  instrumentation: "default-instrumentation"
 
 # ----------------------------------------------------------------------------
 # POD DISRUPTION BUDGET (PDB)
