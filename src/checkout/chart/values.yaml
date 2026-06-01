@@ -2,17 +2,29 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# ----------------------------------------------------------------------------
+# WORKLOAD REPLICA CONFIGURATION
+# ----------------------------------------------------------------------------
 replicaCount: 3
 
+# ----------------------------------------------------------------------------
+# IMAGE CONFIGURATION
+# ----------------------------------------------------------------------------
 image:
   repository: # <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/retail-store/checkout
   pullPolicy: IfNotPresent
   tag: 
 
+# ----------------------------------------------------------------------------
+# METADATA
+# ----------------------------------------------------------------------------
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''
 
+# ----------------------------------------------------------------------------
+# SERVICE ACCOUNT
+# ----------------------------------------------------------------------------
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -24,6 +36,9 @@ serviceAccount:
 
 podAnnotations: {}
 
+# ----------------------------------------------------------------------------
+# SECURITY
+# ----------------------------------------------------------------------------
 podSecurityContext:
   fsGroup: 1000
 
@@ -35,10 +50,16 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
+# ----------------------------------------------------------------------------
+# SERVICE
+# ----------------------------------------------------------------------------
 service:
   type: ClusterIP
   port: 80
 
+# ----------------------------------------------------------------------------
+# RESOURCE MANAGEMENT
+# ----------------------------------------------------------------------------
 resources:
   limits:
     memory: 256Mi
@@ -46,6 +67,9 @@ resources:
     cpu: 128m
     memory: 256Mi
 
+# ----------------------------------------------------------------------------
+# AUTOSCALING - HORIZONTAL POD AUTOSCALER (HPA)
+# ----------------------------------------------------------------------------
 autoscaling:
   enabled: true
   minReplicas: 3
@@ -53,14 +77,24 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# ----------------------------------------------------------------------------
+# SCHEDULING
+# ----------------------------------------------------------------------------
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
 
+# ----------------------------------------------------------------------------
+# TOPOLOGY SPREAD CONSTRAINTS
+# ----------------------------------------------------------------------------
+# Distribute pods across nodes AND availability zones for high availability
 topologySpreadConstraints: []
 
+# ----------------------------------------------------------------------------
+# METRICS
+# ----------------------------------------------------------------------------
 metrics:
   enabled: true
   podAnnotations:
@@ -68,10 +102,16 @@ metrics:
     prometheus.io/port: '8080'
     prometheus.io/path: '/metrics'
 
+# ----------------------------------------------------------------------------
+# CONFIG MAP
+# ----------------------------------------------------------------------------
 configMap:
   create: true
   name:
 
+# ----------------------------------------------------------------------------
+# APPLICATION CONFIGURATION
+# ----------------------------------------------------------------------------
 app:
   persistence:
     provider: 'in-memory'
@@ -81,6 +121,9 @@ app:
   endpoints:
     orders: ''
 
+# ----------------------------------------------------------------------------
+# DATABASE
+# ----------------------------------------------------------------------------
 redis:
   create: false
 
@@ -101,15 +144,25 @@ redis:
 
   affinity: {}
 
+# ----------------------------------------------------------------------------
+# SECURITY GROUPS
+# ----------------------------------------------------------------------------
 securityGroups:
   create: false
 
   securityGroupIds: []
 
+# ----------------------------------------------------------------------------
+# OPEN TELEMETRY
+# ----------------------------------------------------------------------------
 opentelemetry:
-  enabled: false
+  enabled: true
   instrumentation: ''
 
+# ----------------------------------------------------------------------------
+# POD DISRUPTION BUDGET (PDB)
+# ----------------------------------------------------------------------------
+# Maintain minimum availability during voluntary disruptions (node drains, etc.)
 podDisruptionBudget:
   enabled: true
   maxUnavailable: 1

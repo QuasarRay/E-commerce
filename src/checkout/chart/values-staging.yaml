@@ -1,0 +1,29 @@
+# Staging overrides for Checkout service.
+
+# Production-like behavior with smaller capacity and managed Redis.
+
+replicaCount: 2
+
+image:
+  repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/checkout
+  tag: ""        # Updated by CI/CD to sha-<commit>
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+app:
+  persistence:
+    provider: redis
+  redis:
+    endpoint: "<staging-redis-endpoint>"
+
+endpoints:
+  orders: http://orders:80
+
+redis:
+  create: false
+
+nodeSelector:
+  karpenter.sh/capacity-type: spot

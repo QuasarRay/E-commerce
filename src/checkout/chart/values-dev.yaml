@@ -1,0 +1,26 @@
+# Dev overrides for Checkout service.
+
+# Cheap, simple, low-availability environment using in-memory persistence.
+
+replicaCount: 1
+
+image:
+  tag: "" # Updated by CI/CD if dev deployments are enabled
+
+resources:
+  requests:
+    cpu: 64m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+app:
+  persistence:
+    provider: in-memory
+
+endpoints:
+  orders: http://orders:80

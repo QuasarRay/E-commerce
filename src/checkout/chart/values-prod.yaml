@@ -1,0 +1,40 @@
+# Production overrides for Checkout service.
+# Uses managed Redis and production scheduling settings.
+
+image:
+  repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/checkout
+  tag: ""        # Updated by CI/CD to sha-<commit>
+
+app:
+  persistence:
+    provider: redis
+    redis:
+      endpoint: "<prod-redis-endpoint>"
+
+  endpoints:
+    orders: http://orders:80
+
+redis:
+  create: false
+
+nodeSelector:
+  karpenter.sh/capacity-type: on-demand
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: checkout
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: checkout
+
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: checkout
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: checkout
