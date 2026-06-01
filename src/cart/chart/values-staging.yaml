@@ -1,0 +1,27 @@
+# Staging overrides for Cart service.
+
+# Production-like behavior with smaller capacity and managed DynamoDB.
+
+replicaCount: 2
+
+image:
+repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/cart
+tag: ""        # Updated by CI/CD to sha-<commit>
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+app:
+  persistence:
+    provider: dynamodb
+  dynamodb:
+    tableName: Items
+    createTable: false
+
+dynamodb:
+  create: false
+
+nodeSelector:
+  karpenter.sh/capacity-type: spot

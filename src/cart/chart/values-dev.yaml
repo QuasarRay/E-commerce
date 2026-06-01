@@ -1,0 +1,23 @@
+# Dev overrides for Cart service.
+
+# Cheap, simple, low-availability environment.
+
+replicaCount: 1
+
+image:
+tag: "" # Updated by CI/CD if dev deployments are enabled
+
+resources:
+  requests:
+    cpu: 64m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+app:
+  persistence:
+    provider: in-memory

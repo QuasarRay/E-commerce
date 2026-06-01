@@ -1,0 +1,44 @@
+# Production overrides for Cart service.
+
+# Uses managed DynamoDB and production scheduling settings.
+
+image:
+repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/cart
+tag: ""        # Updated by CI/CD to sha-<commit>
+
+app:
+  persistence:
+    provider: dynamodb
+    dynamodb:
+      tableName: Items
+      createTable: false
+
+dynamodb:
+  create: false
+
+nodeSelector:
+  karpenter.sh/capacity-type: on-demand
+
+topologySpreadConstraints:
+
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: carts
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: carts
+
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: carts
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: carts
+
+opentelemetry:
+  enabled: true
+  instrumentation: "default-instrumentation"
