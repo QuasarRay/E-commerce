@@ -6,7 +6,7 @@
 # IMAGE CONFIGURATION
 # ----------------------------------------------------------------------------
 image:
-  repository: 180789647333.dkr.ecr.us-east-1.amazonaws.com/retail-store/ui
+  repository: # <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/retail-store/ui
   pullPolicy: IfNotPresent
   tag: sha-24dab79
 
@@ -65,7 +65,7 @@ autoscaling:
 # ----------------------------------------------------------------------------
 # Schedule pods on Karpenter On-Demand nodes for stability
 nodeSelector:
-  karpenter.sh/capacity-type: spot
+  karpenter.sh/capacity-type: 
 
 # ----------------------------------------------------------------------------
 # TOPOLOGY SPREAD CONSTRAINTS
@@ -91,15 +91,6 @@ topologySpreadConstraints:
         app.kubernetes.io/name: ui
         app.kubernetes.io/component: service
         app.kubernetes.io/instance: ui
-
-# ----------------------------------------------------------------------------
-# POD DISRUPTION BUDGET (PDB)
-# ----------------------------------------------------------------------------
-# Maintain minimum availability during voluntary disruptions (node drains, etc.)
-podDisruptionBudget:
-  enabled: false
-  maxUnavailable: 1
-
 
 opentelemetry:
   enabled: true

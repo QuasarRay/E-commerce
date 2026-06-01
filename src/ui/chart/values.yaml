@@ -2,8 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 3
-
+# ----------------------------------------------------------------------------
+# IMAGE CONFIGURATION
+# ----------------------------------------------------------------------------
 image:
   repository: # <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/retail-store/ui
   pullPolicy: IfNotPresent
@@ -44,6 +45,9 @@ service:
   # loadBalancerClass: ""
   # nodePort: 30000
 
+# ----------------------------------------------------------------------------
+# RESOURCE MANAGEMENT
+# ----------------------------------------------------------------------------
 resources:
   limits:
     memory: 512Mi
@@ -51,18 +55,28 @@ resources:
     cpu: 128m
     memory: 512Mi
 
+# ----------------------------------------------------------------------------
+# AUTOSCALING - HORIZONTAL POD AUTOSCALER (HPA)
+# ----------------------------------------------------------------------------
 autoscaling:
   enabled: true
   minReplicas: 3
   maxReplicas: 10
   targetCPUUtilizationPercentage: 50
 
+# ----------------------------------------------------------------------------
+# KARPENTER NODE SELECTION
+# ----------------------------------------------------------------------------
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
 
+# ----------------------------------------------------------------------------
+# TOPOLOGY SPREAD CONSTRAINTS
+# ----------------------------------------------------------------------------
+# Distribute pods across nodes AND availability zones for high availability
 topologySpreadConstraints: []
 
 metrics:
@@ -76,6 +90,9 @@ configMap:
   create: true
   name: # if blank this will be generated
 
+# ----------------------------------------------------------------------------
+# APPLICATION CONFIGURATION
+# ----------------------------------------------------------------------------
 app:
   # theme: default
   endpoints: {}
@@ -97,7 +114,9 @@ app:
       baseUrl: ""
       # apiKey: ""
 
-## Ingress for load balancer
+# ----------------------------------------------------------------------------
+# INGRESS CONFIGURATION - AWS ALB
+# ----------------------------------------------------------------------------
 ingress:
   enabled: false
   # className: ""
@@ -127,6 +146,10 @@ opentelemetry:
   enabled: false
   instrumentation: ""
 
+# ----------------------------------------------------------------------------
+# POD DISRUPTION BUDGET (PDB)
+# ----------------------------------------------------------------------------
+# Maintain minimum availability during voluntary disruptions (node drains, etc.)
 podDisruptionBudget:
   enabled: true
   maxUnavailable: 1

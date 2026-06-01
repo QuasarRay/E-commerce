@@ -1,0 +1,22 @@
+# Staging overrides for UI service.
+
+# Production-like behavior with smaller capacity.
+
+replicaCount: 2
+
+autoscaling:
+minReplicas: 2
+maxReplicas: 5
+targetCPUUtilizationPercentage: 70
+
+ingress:
+enabled: true
+className: alb
+annotations:
+alb.ingress.kubernetes.io/scheme: internal
+alb.ingress.kubernetes.io/target-type: ip
+alb.ingress.kubernetes.io/healthcheck-path: /actuator/health/liveness
+hosts: []
+
+nodeSelector:
+karpenter.sh/capacity-type: spot
