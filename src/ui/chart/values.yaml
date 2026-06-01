@@ -3,6 +3,11 @@
 # Declare variables to be passed into your templates.
 
 # ----------------------------------------------------------------------------
+# WORKLOAD REPLICA CONFIGURATION
+# ----------------------------------------------------------------------------
+replicaCount: 3
+
+# ----------------------------------------------------------------------------
 # IMAGE CONFIGURATION
 # ----------------------------------------------------------------------------
 image:
@@ -10,10 +15,18 @@ image:
   pullPolicy: IfNotPresent
   tag: 
 
+# ----------------------------------------------------------------------------
+# METADATA
+# ----------------------------------------------------------------------------
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+podAnnotations: {}
+
+# ----------------------------------------------------------------------------
+# SERVICE ACCOUNT
+# ----------------------------------------------------------------------------
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -23,7 +36,6 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations: {}
 
 # ----------------------------------------------------------------------------
 # SECURITY
@@ -71,7 +83,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 
 # ----------------------------------------------------------------------------
-# KARPENTER NODE SELECTION
+# SCHEDULING
 # ----------------------------------------------------------------------------
 nodeSelector: {}
 
@@ -85,6 +97,9 @@ affinity: {}
 # Distribute pods across nodes AND availability zones for high availability
 topologySpreadConstraints: []
 
+# ----------------------------------------------------------------------------
+# METRICS
+# ----------------------------------------------------------------------------
 metrics:
   enabled: true
   podAnnotations:
@@ -92,6 +107,9 @@ metrics:
     prometheus.io/port: "8080"
     prometheus.io/path: "/actuator/prometheus"
 
+# ----------------------------------------------------------------------------
+# CONFIG MAP
+# ----------------------------------------------------------------------------
 configMap:
   create: true
   name: # if blank this will be generated
