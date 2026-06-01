@@ -92,6 +92,10 @@ topologySpreadConstraints:
         app.kubernetes.io/component: service
         app.kubernetes.io/instance: ui
 
+# ----------------------------------------------------------------------------
+# OPEN TELEMETRY
+# ----------------------------------------------------------------------------
+
 opentelemetry:
   enabled: true
   instrumentation: "default-instrumentation"  
