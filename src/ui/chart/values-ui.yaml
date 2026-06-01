@@ -56,7 +56,7 @@ resources:
 # ----------------------------------------------------------------------------
 autoscaling:
   enabled: true
-  minReplicas: 1
+  minReplicas: 3
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
 
@@ -98,8 +98,7 @@ topologySpreadConstraints:
 # Maintain minimum availability during voluntary disruptions (node drains, etc.)
 podDisruptionBudget:
   enabled: false
-  minAvailable: 2      # At least 2 pods must remain available
-  maxUnavailable: 0    # Disable maxUnavailable (only minAvailable active)
+  maxUnavailable: 1
 
 
 opentelemetry:
