@@ -63,10 +63,12 @@ jobs:
           IMAGE_BASE="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}"
 
           echo "SHA_TAG=$SHA_TAG" >> "$GITHUB_ENV"
+          echo "IMAGE_BASE=$IMAGE_BASE" >> "$GITHUB_ENV"
           echo "IMAGE_SHA=$IMAGE_BASE:$SHA_TAG" >> "$GITHUB_ENV"
           echo "IMAGE_LATEST=$IMAGE_BASE:latest" >> "$GITHUB_ENV"
 
           echo "Service: $SERVICE_NAME"
+          echo "Using repository: $IMAGE_BASE"
           echo "Using tags: latest and $SHA_TAG"
 
       - name: Build and push Docker images
@@ -87,14 +89,21 @@ jobs:
             echo "Recommended value: <github-user-id>+<username>@users.noreply.github.com"
             exit 1
           fi
-          
+
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ vars.GIT_COMMIT_EMAIL }}"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
-      - name: Update Helm values file with new image tag
+      - name: Install yq
         run: |
-          sed -i "s|^\([[:space:]]*tag:[[:space:]]*\).*|\1$SHA_TAG|" "$HELM_VALUES_FILE"
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Update Helm values file with new image repository and tag
+        run: |
+          yq -i '.image.repository = strenv(IMAGE_BASE)' "$HELM_VALUES_FILE"
+          yq -i '.image.tag = strenv(SHA_TAG)' "$HELM_VALUES_FILE"
 
           git diff --quiet || (
             git add "$HELM_VALUES_FILE"
