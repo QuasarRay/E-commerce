@@ -81,6 +81,13 @@ jobs:
 
       - name: Setup Git auth using GITHUB_TOKEN
         run: |
+          if [ -z "${{ vars.GIT_COMMIT_EMAIL }}" ]; then
+            echo "ERROR: Missing repository variable GIT_COMMIT_EMAIL."
+            echo "Set it in GitHub: Settings → Secrets and variables → Actions → Variables."
+            echo "Recommended value: <github-user-id>+<username>@users.noreply.github.com"
+            exit 1
+          fi
+          
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ vars.GIT_COMMIT_EMAIL }}"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
