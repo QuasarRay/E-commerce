@@ -1,0 +1,26 @@
+# Dev overrides for Orders service.
+
+# Cheap, simple, low-availability environment using in-memory persistence and messaging.
+
+replicaCount: 1
+
+image:
+  tag: "" # Updated by CI/CD if dev deployments are enabled
+
+resources:
+  requests:
+    cpu: 64m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+app:
+  persistence:
+    provider: in-memory
+
+  messaging:
+    provider: in-memory

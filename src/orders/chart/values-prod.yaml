@@ -1,0 +1,53 @@
+# Production overrides for Orders service.
+# Uses external managed PostgreSQL and RabbitMQ-compatible messaging.
+
+image:
+  repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/orders
+  tag: ""        # Updated by CI/CD to sha-<commit>
+
+app:
+  persistence:
+    provider: postgresql
+    endpoint: "<prod-rds-postgresql-endpoint>"
+    database: "orders"
+
+    secret:
+      create: false
+      name: orders-db
+
+  messaging:
+    provider: rabbitmq
+
+    rabbitmq:
+      addresses:
+        - "<prod-rabbitmq-amqp-endpoint>"
+
+      secret:
+        create: false
+        name: orders-rabbitmq
+
+nodeSelector:
+  karpenter.sh/capacity-type: on-demand
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: orders
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: orders
+
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: orders
+        app.kubernetes.io/component: service
+        app.kubernetes.io/instance: orders
+
+opentelemetry:
+  enabled: true
+  instrumentation: "default-instrumentation"

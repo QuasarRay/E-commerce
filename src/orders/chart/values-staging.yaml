@@ -1,0 +1,38 @@
+# Staging overrides for Orders service.
+
+# Production-like behavior with smaller capacity and external managed dependencies.
+
+replicaCount: 2
+
+image:
+  repository: "" # Set by CI/CD to <account-id>.dkr.ecr.<region>.amazonaws.com/retail-store/orders
+  tag: ""        # Updated by CI/CD to sha-<commit>
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+app:
+  persistence:
+    provider: postgresql
+    endpoint: "<staging-rds-postgresql-endpoint>"
+    database: "orders"
+
+    secret:
+      create: false
+      name: orders-db
+
+  messaging:
+    provider: rabbitmq
+
+rabbitmq:
+  addresses:
+    - "<staging-rabbitmq-amqp-endpoint>"
+
+  secret:
+    create: false
+    name: orders-rabbitmq
+
+nodeSelector:
+karpenter.sh/capacity-type: spot
